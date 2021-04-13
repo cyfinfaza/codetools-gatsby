@@ -1,8 +1,10 @@
 module.exports = {
   siteMetadata: {
-    title: `Gatsby Default Starter`,
-    description: `Kick off your next, great Gatsby project with this default starter. This barebones starter ships with the main Gatsby configuration files you might need.`,
-    author: `@gatsbyjs`,
+    title: `CodeTools`,
+    description: `The Gatsby version of CodeTools`,
+    author: `@cyfinfaza`,
+    apiLocation: `http://localhost:5000/api`,
+    recaptchaSitekey: `6LdUiTMaAAAAAM1UpsF4jx1AnINaESqj03r5tv9_`,
   },
   plugins: [
     `gatsby-plugin-react-helmet`,
