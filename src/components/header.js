@@ -2,8 +2,9 @@ import * as React from "react"
 import { useEffect, useState, useRef } from "react"
 import PropTypes from "prop-types"
 import { graphql, Link, useStaticQuery } from "gatsby"
+import { Helmet } from "react-helmet"
 
-const Header = ({ pageName, hideButtons = false, hideEditorButton = false }) => {
+const Header = ({ pageName, hideButtons = false, hideEditorButton = false, noTabTitle = false }) => {
   const headerQuery = useStaticQuery(graphql`
     query HeaderQuery {
       site {
@@ -43,7 +44,7 @@ const Header = ({ pageName, hideButtons = false, hideEditorButton = false }) => 
   }
   return (
     <>
-      <title>{pageName}</title>
+      <Helmet title={noTabTitle || !pageName ? headerQuery.site.siteMetadata.title : pageName + " - " + headerQuery.site.siteMetadata.title} />
       <div style={{ position: "fixed", display: "flex", width: "100%", justifyContent: "center", zIndex: 200 }}>
         <div id="alertMessage" className="invertAdaptBackground">
           Alert
@@ -81,9 +82,13 @@ const Header = ({ pageName, hideButtons = false, hideEditorButton = false }) => 
                 <button
                   className="hoverfancy"
                   // onclick="fadeThenGo('/testeditor')"
+                  onClick={() => {
+                    if (!user.active) localStorage.setItem("intent", "/mystuff")
+                    window.location = user.active ? "/mystuff" : "/signup"
+                  }}
                   style={{ marginRight: 16, marginLeft: 8, height: 48, paddingLeft: 16, paddingRight: 16, backgroundColor: "#FFFFFF", color: "black" }}
                 >
-                  Open Editor
+                  {user.active ? "My Stuff" : "Code Now"}
                 </button>
               )}
               <button
@@ -146,11 +151,8 @@ const Header = ({ pageName, hideButtons = false, hideEditorButton = false }) => 
         //   setMenuOpen({ ...menuOpen, menuFocus: false })
         // }}
       >
-        <a className="activefancy button-like" href="/testeditor">
-          Test Editor
-        </a>
-        <a className="activefancy button-like" href="/newchallenge">
-          Test Challenge
+        <a className="activefancy button-like" href="/mystuff">
+          My Stuff
         </a>
         <a className="activefancy button-like" href="/account">
           My Account

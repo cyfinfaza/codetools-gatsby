@@ -24,14 +24,16 @@ const SignUp = ({ data }) => {
       setErrorMsg(signinResult.error)
     }
     if (signinResult.status == "success") {
-      window.location = "/"
+      var intent = localStorage.getItem("intent")
+      localStorage.removeItem("intent")
+      window.location = intent ? intent : "/"
       setLoading(true)
     }
   }
   const [formData, setFormData] = useState({ username: "", password: "" })
   const [errorMsg, setErrorMsg] = useState("")
   return (
-    <Layout disableTopPadding>
+    <Layout pageName="Sign In" disableTopPadding>
       <div className="topwhenmobile" style={{ display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", width: "100%", height: "100%" }}>
         <div id="nameEnter" style={{ marginTop: 84 }}>
           <form onSubmit={trySignin} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>

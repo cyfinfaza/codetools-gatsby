@@ -4,7 +4,7 @@ import * as componentStyle from "./loadingring.module.css"
 const LoadingRing = ({ active, size, style }) => {
   return (
     <div className={componentStyle.container} style={{ width: active ? size : 0, height: active ? size : 0, opacity: active ? 1 : 0, ...style, margin: active ? null : "0 !important" }}>
-      <svg class="loadingCircle" style={{ width: size, height: size }} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg className="loadingCircle" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path
           d="M40 20C40 14.6957 37.8929 9.60859 34.1421 5.85786C30.3914 2.10714 25.3043 4.00466e-07 20 0C14.6957 -4.00466e-07 9.60859 2.10714 5.85787 5.85786C2.10714 9.60859 8.00932e-07 14.6957 0 20L3.11946 20C3.11946 15.523 4.89794 11.2294 8.06366 8.06365C11.2294 4.89794 15.523 3.11946 20 3.11946C24.477 3.11946 28.7706 4.89794 31.9363 8.06366C35.1021 11.2294 36.8805 15.523 36.8805 20H40Z"
           fill="#FFF"
@@ -19,3 +19,5 @@ const LoadingRing = ({ active, size, style }) => {
 }
 
 export default LoadingRing
+
+// style={{ width: size, height: size }}

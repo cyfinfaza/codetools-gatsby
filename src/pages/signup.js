@@ -28,8 +28,25 @@ const SignIn = ({ data }) => {
       recaptchaRef.current.reset()
     }
     if (signupResult.status == "success") {
-      window.location = "/signin"
       setLoading(true)
+      let signinResult = await (
+        await fetch(api + "/signin", { credentials: "include", method: "post", body: JSON.stringify(formData) }).catch(() => {
+          setErrorMsg("Error connecting to the server.")
+          setLoading(false)
+        })
+      ).json()
+      setLoading(false)
+      if (!signinResult) return
+      console.log(signinResult)
+      if (signinResult.status == "error") {
+        setErrorMsg(signinResult.error)
+      }
+      if (signinResult.status == "success") {
+        var intent = localStorage.getItem("intent")
+        localStorage.removeItem("intent")
+        window.location = intent ? intent : "/"
+        setLoading(true)
+      }
     }
   }
   const [formData, setFormData] = useState({ username: "", password: "" })

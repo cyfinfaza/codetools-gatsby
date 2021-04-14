@@ -1,12 +1,14 @@
 import React from "react"
 import { graphql } from "gatsby"
 import { useState, useEffect, useRef } from "react"
-import Modal from "../components/editor/Modal"
+import Modal from "../components/Modal"
 import LoadingScreen from "../components/editor/LoadingScreen"
-import CodeFileButton from "../components/editor/CodeFileButton"
+import TabLayoutButton from "../components/tabLayoutButton"
 import Editor from "@monaco-editor/react"
 import RunArg from "../components/editor/RunArg"
 import ReadonlyRunArg from "../components/editor/ReadonlyRunArg"
+import "../components/editor/editorstyle.css"
+import ReactMarkdown from "react-markdown"
 
 import Layout from "../components/layout"
 
@@ -20,7 +22,7 @@ let uploadBody
 const keyLang = {
   code: "java",
   starterCode: "java",
-  description: "html",
+  description: "markdown",
 }
 const keyOpt = {
   code: { wordWrap: "off" },
@@ -77,7 +79,7 @@ const EditorPage = ({ data }) => {
     setLinkIdData(linkIdFetchResult)
     editorType = linkIdFetchResult.data.type
     contentID = linkIdFetchResult.data["_id"]
-    await fetch("/contentget?id=" + contentID)
+    await fetch(api + "/contentget?id=" + contentID, { credentials: "include" })
       .then(response => response.json())
       .then(async function (data) {
         console.log(data)
@@ -105,7 +107,7 @@ const EditorPage = ({ data }) => {
         }
         if (data.timeout) metadataToSet.timeout = data.timeout
         if (editorType == "editor_challenge") {
-          await fetch("/contentget?id=" + data.assocChallenge)
+          await fetch(api + "/contentget?id=" + data.assocChallenge, { credentials: "include" })
             .then(response => response.json())
             .then(assocData => {
               // console.log(assocData)
@@ -199,7 +201,7 @@ const EditorPage = ({ data }) => {
       uploadInstanceCount += 1
       theUploaderHasGotThis = true
       // console.log(theUploaderHasGotThis);
-      await fetch("/contentset", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(uploadBody) })
+      await fetch(api + "/contentset", { credentials: "include", method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(uploadBody) })
         .then(response => response.json())
         .then(data => {
           // console.log(data);
@@ -238,7 +240,7 @@ const EditorPage = ({ data }) => {
     await checkAndSave()
     setRunStatus({ icon: "hourglass_full", text: "Requesting...", style: "fancybutton_half", enabled: true })
     let auth
-    await fetch("/fetchsession")
+    await fetch(api + "/fetchsession", { credentials: "include" })
       .then(response => response.json())
       .then(data => (auth = data.data))
     console.log(auth)
@@ -307,7 +309,7 @@ const EditorPage = ({ data }) => {
           </div>
         </Modal>
         <LoadingScreen open={openModal == "contentLoading"}>
-          <img src="/static/CodeToolsLogo.svg" style={{ width: "50%", marginBottom: 16 }}></img>
+          <img src="/CodeToolsLogo.svg" style={{ width: "50%", marginBottom: 16 }}></img>
           <div className="loadingBar" style={{ width: "100%", height: 8 }}></div>
         </LoadingScreen>
         <Modal open={openModal == "fatalError"} title="Fatal Error" noCloseButton onClose={() => setOpenModal(null)}>
@@ -327,26 +329,26 @@ const EditorPage = ({ data }) => {
           )}
           <p style={{ marginTop: "24px" }} id="contentDescription">
             {/* <ReactSafeHtml html={code.description == null ? "Loading..." : code.description} /> */}
-            {code.description == null ? "Loading..." : code.description}
+            {code.description == null ? "Loading..." : <ReactMarkdown>{code.description}</ReactMarkdown>}
           </p>
         </div>
         <div className="threeCenter">
           {editorType == "editor_standalone" && (
             <div className="tabs">
-              <CodeFileButton name="Code" keyName="code" compareKey={openCodeKey} changeKeyMethod={setOpenCodeKey} />
-              <CodeFileButton name="Description" keyName="description" compareKey={openCodeKey} changeKeyMethod={setOpenCodeKey} />
+              <TabLayoutButton name="Code" keyName="code" compareKey={openCodeKey} changeKeyMethod={setOpenCodeKey} />
+              <TabLayoutButton name="Description" keyName="description" compareKey={openCodeKey} changeKeyMethod={setOpenCodeKey} />
             </div>
           )}
           {editorType == "challenge" && (
             <div className="tabs">
-              <CodeFileButton name="Solution" keyName="code" compareKey={openCodeKey} changeKeyMethod={setOpenCodeKey} />
-              <CodeFileButton name="Starter Code" keyName="starterCode" compareKey={openCodeKey} changeKeyMethod={setOpenCodeKey} />
-              <CodeFileButton name="Description" keyName="description" compareKey={openCodeKey} changeKeyMethod={setOpenCodeKey} />
+              <TabLayoutButton name="Solution" keyName="code" compareKey={openCodeKey} changeKeyMethod={setOpenCodeKey} />
+              <TabLayoutButton name="Starter Code" keyName="starterCode" compareKey={openCodeKey} changeKeyMethod={setOpenCodeKey} />
+              <TabLayoutButton name="Description" keyName="description" compareKey={openCodeKey} changeKeyMethod={setOpenCodeKey} />
             </div>
           )}
           {editorType == "editor_challenge" && (
             <div className="tabs">
-              <CodeFileButton name="Code" keyName="code" compareKey={openCodeKey} changeKeyMethod={setOpenCodeKey} />
+              <TabLayoutButton name="Code" keyName="code" compareKey={openCodeKey} changeKeyMethod={setOpenCodeKey} />
             </div>
           )}
           <Editor
