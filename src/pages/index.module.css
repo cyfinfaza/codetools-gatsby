@@ -1,0 +1,51 @@
+.backgroundImage, .backgroundImage>div, .coveringContent{
+	width: 100%;
+	height: 100%;
+}
+.backgroundImage{
+	overflow: hidden;
+}
+.backgroundImage>div {
+	
+	background-image: url("/codetoolshome1.png");
+	background-position: center;
+	background-size:auto;
+	z-index: 0;
+	filter: brightness(0.5);
+	animation: dropin 5s cubic-bezier(.1,.71,0,.99) backwards, fadein 2s linear backwards 0.5s;
+	
+}
+.coveringContent{
+	z-index: 10;
+	position: absolute;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	/* padding-top: 64px; */
+	box-sizing: border-box;
+	animation: fadein 1s ease backwards;
+}
+.coveringContent>div{
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+}
+.coveringContent>div>h1{
+	font-size: 96px;
+}
+.coveringContent>div>*{
+	text-align: center;
+}
+@keyframes dropin {
+	0%{
+		transform: scale(2);
+		/* opacity: 0; */
+		filter: none;
+	}
+}
+@keyframes fadein {
+	0%{
+		opacity: 0;
+	}
+}

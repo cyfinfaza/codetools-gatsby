@@ -78,6 +78,7 @@ const EditorPage = ({ data }) => {
     console.log(linkIdFetchResult)
     setLinkIdData(linkIdFetchResult)
     editorType = linkIdFetchResult.data.type
+    console.log(editorType)
     contentID = linkIdFetchResult.data["_id"]
     await fetch(api + "/contentget?id=" + contentID, { credentials: "include" })
       .then(response => response.json())

@@ -49,7 +49,7 @@ const MyStuff = ({ data }) => {
       setNewLoading(true)
       var response = await (await fetch(api + "/new/" + tabName, { credentials: "include" })).json()
       console.log(response)
-      window.location = "/editor?id=" + response.data.linkID
+      window.location = "/editor/?id=" + response.data.linkID
     }
     async function deleteContent(id) {
       setLoading(true)
@@ -82,7 +82,7 @@ const MyStuff = ({ data }) => {
                   key={content["_id"]}
                   className={pageStyle.gridCard}
                   onClick={() => {
-                    if (!disableGo) window.location = "/editor?id=" + content.linkID
+                    if (!disableGo) window.location = "/editor/?id=" + content.linkID
                   }}
                   style={{ animationDelay: disableGo ? null : (index + (tabName != "editor_challenge" ? 0 : 1)) * 0.05 + "s", animationName: disableGo ? "none" : null }}
                 >
@@ -113,8 +113,8 @@ const MyStuff = ({ data }) => {
     )
   }
   return (
-    <Layout pageName="My Stuff" applyPadding="16px">
-      <h1 className="horizPanel">
+    <Layout pageName="My Stuff" applyPadding="16px" disableFixedToScreenWidth>
+      <h1 className="horizPanel" style={{ marginTop: 0 }}>
         <LoadingRing size="1em" active={loading} />
         <span style={{ marginLeft: loading ? "16px" : null }}></span>
         <Tab tabName="editor_standalone" />

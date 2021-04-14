@@ -4,7 +4,7 @@ import PropTypes from "prop-types"
 import { graphql, Link, useStaticQuery } from "gatsby"
 import { Helmet } from "react-helmet"
 
-const Header = ({ pageName, hideButtons = false, hideEditorButton = false, noTabTitle = false }) => {
+const Header = ({ pageName, hideButtons = false, hideEditorButton = false, noTabTitle = false, transparent = false }) => {
   const headerQuery = useStaticQuery(graphql`
     query HeaderQuery {
       site {
@@ -50,7 +50,21 @@ const Header = ({ pageName, hideButtons = false, hideEditorButton = false, noTab
           Alert
         </div>
       </div>
-      <div id="header" style={{ position: "fixed", top: 0, width: "100%", height: 84, display: "flex", alignItems: "center", zIndex: 50, justifyContent: "center" }}>
+      <div
+        id="header"
+        style={{
+          position: "fixed",
+          top: 0,
+          width: "100%",
+          height: 84,
+          display: "flex",
+          alignItems: "center",
+          zIndex: 50,
+          justifyContent: "center",
+          background: transparent ? "none" : null,
+          backdropFilter: transparent ? "none" : null,
+        }}
+      >
         <div style={{ display: "flex", flex: 1, alignItems: "center" }}>
           <img
             src="/CodeToolsLogo.svg"
