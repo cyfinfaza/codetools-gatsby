@@ -1,11 +1,12 @@
 import * as React from "react"
 
 export default function RunArg({ arg, onDelete, onChange }) {
-  const { text, output, id, match } = arg
+  const { text, output, id, match, type } = arg
   var color = null
   if (match != null) {
     color = match ? "#0F0" : "#FD0"
   }
+  if (type && type != "Success") color = "#F00"
   return (
     <div className="arg_mutable arg">
       <div className="inputdiv">

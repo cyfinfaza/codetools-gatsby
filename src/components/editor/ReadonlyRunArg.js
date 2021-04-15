@@ -1,11 +1,12 @@
-import React from "react";
+import React from "react"
 
 export default function ReadonlyRunArg({ arg }) {
-  const { text, output, match } = arg;
-  var color = null;
+  const { text, output, match, type } = arg
+  var color = null
   if (match != null) {
-    color = match ? "#0F0" : "#FD0";
+    color = match ? "#0F0" : "#FD0"
   }
+  if (type && type != "Success") color = "#F00"
   return (
     <div className="arg_readonly arg">
       <div className="inputdiv">
@@ -20,5 +21,5 @@ export default function ReadonlyRunArg({ arg }) {
         <span className="resultOutput">{output}</span>
       </p>
     </div>
-  );
+  )
 }
