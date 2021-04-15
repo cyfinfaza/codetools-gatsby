@@ -44,9 +44,9 @@
 	margin: 0;
 }
 
-.gridCard> *:first-child{
-	/* margin-bottom: 64px; */
-}
+/* .gridCard> *:first-child{
+	margin-bottom: 64px;
+} */
 
 .gridLayout>*{
 	margin: 0;
