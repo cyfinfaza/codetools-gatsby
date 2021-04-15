@@ -59,7 +59,7 @@ const EditorPage = ({ data }) => {
   const [fetchError, setFetchError] = useState("Unknown error.")
   // const [openModal, setOpenModal] = useState(null);
   const [openModal, setOpenModal] = useState("contentLoading")
-  window.setOpenModal = setOpenModal
+  // window.setOpenModal = setOpenModal
   const [openCodeKey, setOpenCodeKey] = useState(null)
   const [currentCodeText, setCurrentCodeText] = useState(null)
   const [code, setCode] = useState({
