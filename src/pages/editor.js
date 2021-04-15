@@ -11,6 +11,7 @@ import "../components/editor/editorstyle.css"
 import ReactMarkdown from "react-markdown"
 
 import Layout from "../components/layout"
+import ModalContainer from "../components/modalContainer"
 
 let uploadInstanceCount = 1
 let globalUploadFlag = false
@@ -52,9 +53,13 @@ const EditorPage = ({ data }) => {
     title: null,
     timeout: null,
   })
+  const [currentCompilerError, setCurrentCompilerError] = useState(null)
+  const [challengeComplete, setChallengeComplete] = useState(false)
   const [uploadFlag, setUploadFlag] = useState(false)
+  const [fetchError, setFetchError] = useState("Unknown error.")
   // const [openModal, setOpenModal] = useState(null);
   const [openModal, setOpenModal] = useState("contentLoading")
+  window.setOpenModal = setOpenModal
   const [openCodeKey, setOpenCodeKey] = useState(null)
   const [currentCodeText, setCurrentCodeText] = useState(null)
   const [code, setCode] = useState({
@@ -71,113 +76,134 @@ const EditorPage = ({ data }) => {
   const [runStatus, setRunStatus] = useState({ icon: "info", text: "Connecting to ECWS", style: "fancybutton_warn", enabled: false })
   let codeForEditor = code[openCodeKey]
   useEffect(async function () {
-    var params = new URLSearchParams(window.location.search)
-    const linkID = params.get("id")
-    setLinkIdData(linkID)
-    let linkIdFetchResult = await (await fetch(api + "/getContentFromLinkID/" + linkID, { credentials: "include" }).catch(() => setLinkIdData("Failed to connect to server."))).json()
-    console.log(linkIdFetchResult)
-    setLinkIdData(linkIdFetchResult)
-    editorType = linkIdFetchResult.data.type
-    console.log(editorType)
-    contentID = linkIdFetchResult.data["_id"]
-    await fetch(api + "/contentget?id=" + contentID, { credentials: "include" })
-      .then(response => response.json())
-      .then(async function (data) {
-        console.log(data)
-        if (data.status == "error") {
-          setOpenModal("fatalError")
-          console.error(data)
-          return
+    try {
+      var params = new URLSearchParams(window.location.search)
+      const linkID = params.get("id")
+      setLinkIdData(linkID)
+      let linkIdFetchResult = await (await fetch(api + "/getContentFromLinkID/" + linkID, { credentials: "include" }).catch(() => setLinkIdData("Failed to connect to server."))).json()
+      console.log(linkIdFetchResult)
+      setLinkIdData(linkIdFetchResult)
+      if (linkIdFetchResult.status == "error") {
+        if (linkIdFetchResult.errorCode == "api_general_session") {
+          localStorage.setItem("intent", window.location.href)
+          window.location = "/signin"
+        } else {
+          setOpenModal("notFoundError")
+          setFetchError(linkIdFetchResult.error)
         }
-        data = data.data
-        var metadataToSet = {}
-        var codeToSet = {}
-        codeToSet.code = data.code
-        id_sig = data.id_sig
-        setArgs(
-          data.args_mutable.map(server_arg => {
-            return { id: server_arg.id, text: server_arg.arg, output: "No Output" }
-          })
-        )
-        if (editorType == "editor_standalone" || editorType == "challenge") {
-          metadataToSet.title = data.title
-          codeToSet.description = data.description
-        }
-        if (editorType == "challenge") {
-          codeToSet.starterCode = data.starterCode
-        }
-        if (data.timeout) metadataToSet.timeout = data.timeout
-        if (editorType == "editor_challenge") {
-          await fetch(api + "/contentget?id=" + data.assocChallenge, { credentials: "include" })
-            .then(response => response.json())
-            .then(assocData => {
-              // console.log(assocData)
-              assocData = assocData.data
-              metadataToSet.title = assocData.title
-              codeToSet.description = assocData.description
-            })
-          setArgs_immutable(
-            data.args_immutable.map(server_arg => {
+        return
+      } else {
+        editorType = linkIdFetchResult.data.type
+      }
+      console.log(editorType)
+      contentID = linkIdFetchResult.data["_id"]
+      await fetch(api + "/contentget?id=" + contentID, { credentials: "include" })
+        .then(response => response.json())
+        .then(async function (data) {
+          console.log(data)
+          if (data.status == "error") {
+            setOpenModal("fatalError")
+            console.error(data)
+            return
+          }
+          data = data.data
+          var metadataToSet = {}
+          var codeToSet = {}
+          codeToSet.code = data.code
+          id_sig = data.id_sig
+          setArgs(
+            data.args_mutable.map(server_arg => {
               return { id: server_arg.id, text: server_arg.arg, output: "No Output" }
             })
           )
-        }
-        setCode(codeToSet)
-        codeOnServer = { ...codeToSet }
-        setMetadata(metadataToSet)
-        metadataOnServer = { ...metadataToSet }
-        setInterval(checkAndSave, 10000)
-        setOpenModal(null)
-        document.getElementById("header").style.display = "flex"
-        setOpenCodeKey("code")
+          if (editorType == "editor_standalone" || editorType == "challenge") {
+            metadataToSet.title = data.title
+            codeToSet.description = data.description
+          }
+          if (editorType == "challenge") {
+            codeToSet.starterCode = data.starterCode
+          }
+          if (data.timeout) metadataToSet.timeout = data.timeout
+          if (editorType == "editor_challenge") {
+            await fetch(api + "/contentget?id=" + data.assocChallenge, { credentials: "include" })
+              .then(response => response.json())
+              .then(assocData => {
+                // console.log(assocData)
+                assocData = assocData.data
+                metadataToSet.title = assocData.title
+                codeToSet.description = assocData.description
+              })
+            setArgs_immutable(
+              data.args_immutable.map(server_arg => {
+                return { id: server_arg.id, text: server_arg.arg, output: "No Output" }
+              })
+            )
+          }
+          setCode(codeToSet)
+          codeOnServer = { ...codeToSet }
+          setMetadata(metadataToSet)
+          metadataOnServer = { ...metadataToSet }
+          setInterval(checkAndSave, 10000)
+          setOpenModal(null)
+          document.getElementById("header").style.display = "flex"
+          setOpenCodeKey("code")
+        })
+        .catch(e => {
+          console.error(e)
+          setOpenModal("fatalError")
+        })
+      ecws = new WebSocket("wss://upstairs-direct.secure1.cy2.me/ecws/runcode")
+      ecws.addEventListener("open", () => {
+        setRunStatus({ icon: "play_arrow", text: "Run Code", style: "", enabled: true })
       })
-      .catch(e => {
-        console.error(e)
-        setOpenModal("fatalError")
-      })
-    ecws = new WebSocket("wss://upstairs-direct.secure1.cy2.me/ecws/runcode")
-    ecws.addEventListener("open", () => {
-      setRunStatus({ icon: "play_arrow", text: "Run Code", style: "", enabled: true })
-    })
-    ecws.addEventListener("message", event => {
-      let data = JSON.parse(event.data)
-      let output = ""
-      if (data.type === "statusUpdate") setRunStatus({ icon: "hourglass_full", text: data.status, style: "fancybutton_half", enabled: true })
-      else if (data.type === "error") setRunStatus({ icon: "error", text: data.error, style: "fancybutton_error", enabled: true })
-      else if (data.type === "jobComplete") {
-        if (data.run === "compilerError") {
-          setRunStatus({ icon: "warning", text: "Compiler Error", style: "fancybutton_warn", enabled: true })
-          return
+      ecws.addEventListener("message", event => {
+        let data = JSON.parse(event.data)
+        let output = ""
+        if (data.type === "statusUpdate") setRunStatus({ icon: "hourglass_full", text: data.status, style: "fancybutton_half", enabled: true })
+        else if (data.type === "error") setRunStatus({ icon: "error", text: data.error, style: "fancybutton_error", enabled: true })
+        else if (data.type === "jobComplete") {
+          if (data.run === "compilerError") {
+            setRunStatus({ icon: "error_outline", text: "Tests did not run", style: "fancybutton_warn", enabled: true })
+            setCurrentCompilerError(data.error)
+            return
+          }
+          setCurrentCompilerError(null)
+          setRunStatus({ icon: "check_circle", text: "Tests Complete", style: "fancybutton_on", enabled: true })
+          // console.log(args_ref.current);
+          setArgs(
+            args_ref.current.map(existingArg => {
+              let thisResult = data.data.filter(runResult => runResult.id === existingArg.id)[0]
+              if (thisResult) {
+                return { ...existingArg, ...thisResult, match: editorType == "editor_challenge" ? null : true }
+              }
+              // console.log(existingArg);
+              return existingArg
+            })
+          )
+          var completionCheck = true
+          setArgs_immutable(
+            args_immutable_ref.current.map(existingArg => {
+              let thisResult = data.data.filter(runResult => runResult.id === existingArg.id)[0]
+              if (thisResult) {
+                completionCheck = completionCheck && thisResult.match
+                return { ...existingArg, ...thisResult }
+              }
+              // console.log(existingArg);
+              completionCheck = completionCheck && existingArg.match
+              return existingArg
+            })
+          )
+          setChallengeComplete(completionCheck)
         }
-        setRunStatus({ icon: "check_circle", text: "Tests Complete", style: "fancybutton_on", enabled: true })
-        // console.log(args_ref.current);
-        setArgs(
-          args_ref.current.map(existingArg => {
-            let thisResult = data.data.filter(runResult => runResult.id === existingArg.id)[0]
-            if (thisResult) {
-              return { ...existingArg, ...thisResult }
-            }
-            // console.log(existingArg);
-            return existingArg
-          })
-        )
-        setArgs_immutable(
-          args_immutable_ref.current.map(existingArg => {
-            let thisResult = data.data.filter(runResult => runResult.id === existingArg.id)[0]
-            if (thisResult) {
-              return { ...existingArg, ...thisResult }
-            }
-            // console.log(existingArg);
-            return existingArg
-          })
-        )
-      }
-      // console.log(data);
-      // console.log(runStatus);
-    })
-    ecws.addEventListener("close", event => {
-      setRunStatus({ icon: "error", text: "ECWS Offline", style: "fancybutton_error", enabled: false })
-    })
+        // console.log(data);
+        // console.log(runStatus);
+      })
+      ecws.addEventListener("close", event => {
+        setRunStatus({ icon: "error", text: "ECWS Offline", style: "fancybutton_error", enabled: false })
+      })
+    } catch (error) {
+      setOpenModal("fatalError")
+    }
   }, [])
   useEffect(() => {
     let args_mutable = args.map(arg => {
@@ -249,8 +275,8 @@ const EditorPage = ({ data }) => {
   }
   return (
     <Layout pageName="Editor" disableTopPadding>
-      <div className="modalContainer" style={openModal == null || openModal == "contentLoading" ? {} : { backgroundColor: "#8884" }}>
-        <Modal open={openModal == "changeTitle"} title="Change Title" onClose={() => setOpenModal(null)}>
+      <ModalContainer globalCloseCallback={() => setOpenModal(null)}>
+        <Modal open={openModal == "changeTitle"} title="Change Title">
           <input
             onKeyDown={event => {
               if (event.keyCode == 13) setOpenModal(null)
@@ -266,34 +292,18 @@ const EditorPage = ({ data }) => {
             placeholder="New title"
           />
         </Modal>
-        <Modal open={openModal == "editConfig"} title="Edit Config" onClose={() => setOpenModal(null)}>
+        <Modal open={openModal == "editConfig"} title="Edit Config">
           <div
             style={{
-              display: "flex",
-              flexDirection: "row",
-              msFlexDirection: "row",
-              flexDirection: "row",
-              alignItems: "center",
-              WebkitBoxAlign: "center",
-              msFlexAlign: "center",
+              display: "grid",
+              gridTemplateColumns: "auto auto",
+              rowGap: "8px",
               alignItems: "center",
             }}
           >
             <label style={{ marginRight: "10px" }} htmlFor="timeout">
               Timeout:{" "}
             </label>
-            {/* <input
-		  id="timeoutValue"
-		  name="timeout"
-		  onkeydown="if(event.keyCode == 13) {completeChangeConfiguration();}"
-		  type="text"
-		  style={{
-			width: "100%",
-			"boxSizing": "border-box",
-			height: "32px",
-		  }}
-		  placeholder="Timeout"
-		/> */}
             <select value={metadata.timeout ? metadata.timeout : 5} onChange={e => setMetadata({ ...metadata, timeout: parseInt(e.target.value) })}>
               {(() => {
                 var output = []
@@ -307,16 +317,39 @@ const EditorPage = ({ data }) => {
                 return output
               })()}
             </select>
+            <label style={{ marginRight: "10px" }} htmlFor="runMethod">
+              Method to Run:{" "}
+            </label>
+            <input type="text" value={metadata.runMethod ? metadata.runMethod : "myMethod"} onChange={e => setMetadata({ ...metadata, runMethod: e.target.value })}>
+              {/* {(() => {
+                var output = []
+                for (var i = 1; i <= 15; i++) {
+                  output.push(
+                    <option key={i} value={i}>
+                      {i + " seconds"}
+                    </option>
+                  )
+                }
+                return output
+              })()} */}
+            </input>
           </div>
         </Modal>
-        <LoadingScreen open={openModal == "contentLoading"}>
+        <LoadingScreen open={openModal == "contentLoading"} noObscure>
           <img src="/CodeToolsLogo.svg" style={{ width: "50%", marginBottom: 16 }}></img>
           <div className="loadingBar" style={{ width: "100%", height: 8 }}></div>
         </LoadingScreen>
-        <Modal open={openModal == "fatalError"} title="Fatal Error" noCloseButton onClose={() => setOpenModal(null)}>
-          <p>An error has caused this editor to stop. Check the console for details. Reoad the editor.</p>
+        <Modal open={openModal == "fatalError"} title="Fatal Error" noCloseButton fullObscure>
+          <p>An error has caused this editor to stop. Check the console for details. Reload the editor.</p>
         </Modal>
-      </div>
+        <Modal open={openModal == "notFoundError"} title="Fetch Error" noCloseButton fullObscure noAnimate>
+          <p>{fetchError}</p>
+          {/* <p>There was an error fetching the content. Perhaps the URL is incorrect, or the content was deleted. </p> */}
+          <p>
+            <a href="/">Go Home</a>
+          </p>
+        </Modal>
+      </ModalContainer>
       <div className="editor-main" style={openModal == null ? {} : { pointerEvents: "none", userSelect: "none" }}>
         <div id="descriptionSidebar" className="sidebar">
           <h1 id="contentTitle" style={{ marginBottom: "0" }}>
@@ -379,7 +412,7 @@ const EditorPage = ({ data }) => {
           <div
             id="compilerError"
             style={{
-              display: "none",
+              display: currentCompilerError ? "flex" : "none",
               flexDirection: "column",
               msFlexDirection: "column",
               flexDirection: "column",
@@ -398,6 +431,7 @@ const EditorPage = ({ data }) => {
                 msFlexAlign: "center",
                 alignItems: "center",
                 marginBottom: "8px",
+                justifyContent: "center",
               }}
             >
               <i className="material-icons" style={{ marginRight: "8px" }}>
@@ -415,14 +449,14 @@ const EditorPage = ({ data }) => {
                 alignSelf: "flex-start",
               }}
             >
-              Error not displayed.
+              {currentCompilerError}
             </p>
           </div>
           {editorType == "editor_challenge" && (
             <div
               id="challengeCompletedMessage"
               style={{
-                display: "none",
+                display: challengeComplete ? "flex" : "none",
                 flexDirection: "column",
                 msFlexDirection: "column",
                 flexDirection: "column",
@@ -444,7 +478,7 @@ const EditorPage = ({ data }) => {
                 }}
               >
                 <i className="material-icons" style={{ marginRight: "8px" }}>
-                  check_circle
+                  verified
                 </i>{" "}
                 Challenge Completed
               </p>
