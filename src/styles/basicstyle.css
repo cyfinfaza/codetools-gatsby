@@ -33,6 +33,10 @@ a {
     /* text-shadow: 0px 0px 7px #000000; */
 }
 
+*{
+    color-scheme: dark;
+}
+
 body {
     height: 100vh;
     margin: 0;
