@@ -183,7 +183,7 @@ const Header = ({ pageName, hideButtons = false, hideEditorButton = false, noTab
         <a className="activefancy button-like" onClick={signOut}>
           Sign Out
         </a>
-        <a href="about" style={{ all: "unset", marginBlock: "4px", textDecoration: "underline", cursor: "pointer" }}>
+        <a href="/about" style={{ all: "unset", marginBlock: "4px", textDecoration: "underline", cursor: "pointer" }}>
           About
         </a>
       </div>
