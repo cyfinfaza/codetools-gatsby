@@ -536,7 +536,7 @@ export const query = graphql`
   query {
     site {
       siteMetadata {
-        apiLocation
+        title
       }
     }
   }

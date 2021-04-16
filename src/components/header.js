@@ -10,7 +10,6 @@ const Header = ({ pageName, hideButtons = false, hideEditorButton = false, noTab
       site {
         siteMetadata {
           title
-          apiLocation
         }
       }
     }

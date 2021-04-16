@@ -113,8 +113,6 @@ export const query = graphql`
     site {
       siteMetadata {
         title
-        apiLocation
-        recaptchaSitekey
       }
     }
   }

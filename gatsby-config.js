@@ -3,9 +3,6 @@ module.exports = {
     title: `CodeTools`,
     description: `Frontend for CodeTools, written in Gatsby`,
     author: `@cyfinfaza`,
-    apiLocation: `https://upstairs.cy2.me/api`,
-    // apiLocation: `http://localhost:5000/api`,
-    recaptchaSitekey: `6LdUiTMaAAAAAM1UpsF4jx1AnINaESqj03r5tv9_`,
   },
   plugins: [
     `gatsby-plugin-react-helmet`,
