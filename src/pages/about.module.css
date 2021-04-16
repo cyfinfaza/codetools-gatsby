@@ -1,0 +1,40 @@
+.textContainer{
+	margin-inline: auto;
+	max-width: 800px;
+	padding-top: 16px;
+	font-size: 1.5em;
+	/* line-height: 1.2em; */
+}
+code{
+	font-size: 0.9em;
+}
+/* .textContainer *:is(h1, h2, h3, h4, h5, h6){
+	text-align: center;
+} */
+.imagesDiv{
+	width: 100%;
+	/* height: 100px; */
+	display: flex;
+	padding: 32px; 
+	box-sizing: border-box;
+	justify-content: center;
+	margin-top: 24px;
+	align-items: center;
+	flex-wrap: wrap;
+	/* grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	place-items: center;
+	column-gap: 48px; */
+
+	/* align-items: center; */
+}
+.imagesDiv >*{
+	margin-inline: 32px;
+	margin-block: 16px;
+	height: 36px;
+	/* width: 100%; */
+	
+}
+.imagesDiv h2{
+	/* margin-inline: 48px; */
+	height: unset;
+}

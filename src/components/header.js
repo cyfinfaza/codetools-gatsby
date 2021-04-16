@@ -100,7 +100,15 @@ const Header = ({ pageName, hideButtons = false, hideEditorButton = false, noTab
                     if (!user.active) localStorage.setItem("intent", "/mystuff")
                     window.location = user.active ? "/mystuff" : "/signup"
                   }}
-                  style={{ marginRight: 16, marginLeft: 8, height: 48, paddingLeft: 16, paddingRight: 16, backgroundColor: "#FFFFFF", color: "black" }}
+                  style={{
+                    marginRight: 16,
+                    marginLeft: 8,
+                    height: 48,
+                    paddingLeft: 16,
+                    paddingRight: 16,
+                    backgroundColor: "#FFFFFF",
+                    color: "black",
+                  }}
                 >
                   {user.active ? "My Stuff" : "Code Now"}
                 </button>
@@ -147,6 +155,7 @@ const Header = ({ pageName, hideButtons = false, hideEditorButton = false, noTab
         style={{
           zIndex: 100,
           display: menuOpen ? "flex" : "none",
+          alignItems: "center",
           // display: menuOpen.buttonFocus || menuOpen.menuFocus ? "flex" : "none",
           position: "fixed",
           right: 16,
@@ -173,6 +182,9 @@ const Header = ({ pageName, hideButtons = false, hideEditorButton = false, noTab
         </a>
         <a className="activefancy button-like" onClick={signOut}>
           Sign Out
+        </a>
+        <a href="about" style={{ all: "unset", marginBlock: "4px", textDecoration: "underline", cursor: "pointer" }}>
+          About
         </a>
       </div>
     </>
