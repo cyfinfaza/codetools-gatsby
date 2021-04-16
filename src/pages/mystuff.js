@@ -19,7 +19,7 @@ var disableGo = false
 const MyStuff = ({ data }) => {
   const [pageContent, setPageContent] = useState(undefined)
   const [loading, setLoading] = useState(false)
-  const api = data.site.siteMetadata.apiLocation
+  const api = process.env.GATSBY_API_URL
   async function loadPageContent() {
     let myContentRequest = await (await fetch(api + "/myContent", { credentials: "include" })).json()
     console.log(myContentRequest)

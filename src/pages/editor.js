@@ -47,7 +47,7 @@ var editorType
 var contentID
 
 const EditorPage = ({ data }) => {
-  const api = data.site.siteMetadata.apiLocation
+  const api = process.env.GATSBY_API_URL
   const [linkIdData, setLinkIdData] = useState(null)
   const [metadata, setMetadata] = useState({
     title: null,
@@ -152,7 +152,7 @@ const EditorPage = ({ data }) => {
           console.error(e)
           setOpenModal("fatalError")
         })
-      ecws = new WebSocket("wss://upstairs-direct.secure1.cy2.me/ecws/runcode")
+      ecws = new WebSocket(process.env.GATSBY_ECWS_URL + "/ecws/runcode")
       ecws.addEventListener("open", () => {
         setRunStatus({ icon: "play_arrow", text: "Run Code", style: "", enabled: true })
       })

@@ -13,7 +13,7 @@ const AccountPage = ({ data }) => {
   const [sessionsLoading, setSessionsLoading] = useState(false)
   const [userLoading, setUserLoading] = useState(false)
   const [openModal, setOpenModal] = useState(null)
-  const api = data.site.siteMetadata.apiLocation
+  const api = process.env.GATSBY_API_URL
   async function loadAccountData() {
     // setSessionsLoading(true)
     let acctData = await (await fetch(api + "/accountdata", { credentials: "include" })).json()

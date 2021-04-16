@@ -5,7 +5,7 @@ import Layout from "../components/layout"
 import LoadingRing from "../components/loadingring"
 
 const SignUp = ({ data }) => {
-  const api = data.site.siteMetadata.apiLocation
+  const api = process.env.GATSBY_API_URL
   const [loading, setLoading] = useState(false)
   async function trySignin(event) {
     event.preventDefault()

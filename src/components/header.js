@@ -15,7 +15,8 @@ const Header = ({ pageName, hideButtons = false, hideEditorButton = false, noTab
       }
     }
   `)
-  const api = headerQuery.site.siteMetadata.apiLocation
+  // const api = headerQuery.site.siteMetadata.apiLocation
+  const api = process.env.GATSBY_API_URL
   const [user, setUser] = useState(null)
   const [menuOpen, setMenuOpen] = useState(false)
   // const [menuOpen, setMenuOpen] = useState({ buttonFocus: false, menuFocus: false })

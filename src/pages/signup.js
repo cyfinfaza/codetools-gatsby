@@ -7,7 +7,7 @@ import Layout from "../components/layout"
 import LoadingRing from "../components/loadingring"
 
 const SignIn = ({ data }) => {
-  const api = data.site.siteMetadata.apiLocation
+  const api = process.env.GATSBY_API_URL
   const [loading, setLoading] = useState(false)
   async function trySignup(event) {
     event.preventDefault()
@@ -92,7 +92,7 @@ const SignIn = ({ data }) => {
               placeholder="Password"
             />
             <div style={{ marginTop: 6, marginBottom: 2 }}>
-              <ReCAPTCHA ref={recaptchaRef} theme="dark" sitekey={data.site.siteMetadata.recaptchaSitekey} onChange={value => setFormData({ ...formData, "g-recaptcha-response": value })} />
+              <ReCAPTCHA ref={recaptchaRef} theme="dark" sitekey={process.env.GATSBY_RECAPTCHA_SITEKEY} onChange={value => setFormData({ ...formData, "g-recaptcha-response": value })} />
             </div>
             <div className="horizPanel">
               <button className="hoverfancy" style={{ width: "fit-content", marginTop: 8 }} type="submit">
