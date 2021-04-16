@@ -5,7 +5,7 @@ import * as pageStyle from "./about.module.css"
 
 const AboutPage = () => {
   return (
-    <Layout applyPadding="16px" disableFixedToScreenWidth>
+    <Layout applyPadding="16px" pageName="About" disableFixedToScreenWidth>
       <div className={pageStyle.textContainer}>
         <h1>This is the CodeTools platform.</h1>
         <p>
