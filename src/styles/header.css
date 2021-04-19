@@ -132,6 +132,7 @@ form button {
 
 #header {
   background-color: black;
+  transition: 240ms;
 }
 
 @supports (backdrop-filter: saturate(180%) blur(20px)) {
