@@ -41,6 +41,6 @@
 	overflow: auto;
 }
 
-.modalContent> *:last-child{
-	/* margin-bottom: 32px; */
-}
+/* .modalContent> *:last-child{
+	margin-bottom: 32px;
+} */
