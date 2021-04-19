@@ -175,3 +175,13 @@ margin-right: 8px;
 .noTopMarginContents>*{
     margin-top: 0;
 }
+code::-webkit-scrollbar, pre::-webkit-scrollbar{
+    width: 10px;
+    border-radius: 4px;
+    background-color: #FFF2;
+}
+code::-webkit-scrollbar-thumb, pre::-webkit-scrollbar-thumb{
+    width: 10px;
+    background-color: #FFF2;
+    border-radius: 4px;
+}

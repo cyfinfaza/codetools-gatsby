@@ -16,7 +16,7 @@
 }
 
 .monofont,
-code {
+code, pre {
   font-family: "DM Mono", monospace;
 }
 
@@ -148,7 +148,7 @@ code {
   margin-top: 0;
 }
 
-code {
+code:not(pre code), pre {
   padding-top: 2px;
   padding-bottom: 2px;
   padding-right: 6px;

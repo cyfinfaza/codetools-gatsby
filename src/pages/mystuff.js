@@ -84,7 +84,10 @@ const MyStuff = ({ data }) => {
                   onClick={() => {
                     if (!disableGo) window.location = "/editor/?id=" + content.linkID
                   }}
-                  style={{ animationDelay: disableGo ? null : (index + (tabName != "editor_challenge" ? 0 : 1)) * 0.05 + "s", animationName: disableGo ? "none" : null }}
+                  style={{
+                    animationDelay: disableGo ? null : (index + (tabName != "editor_challenge" ? 0 : 1)) * 0.05 + "s",
+                    animationName: disableGo ? "none" : null,
+                  }}
                 >
                   <p style={{ textAlign: "right" }}>
                     {moment.unix(content.modified).fromNow()}
@@ -113,7 +116,7 @@ const MyStuff = ({ data }) => {
     )
   }
   return (
-    <Layout pageName="My Stuff" applyPadding="16px" disableFixedToScreenWidth>
+    <Layout pageName="My Stuff" applyPadding="16px" disableFixedToScreenHeight>
       <h1 className="horizPanel" style={{ marginTop: 0 }}>
         <LoadingRing size="1em" active={loading} />
         <span style={{ marginLeft: loading ? "16px" : null }}></span>
