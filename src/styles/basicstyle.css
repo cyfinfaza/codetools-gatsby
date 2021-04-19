@@ -171,3 +171,7 @@ p>button, h2>button {
 .separateItemsLeft>*{
 margin-right: 8px;
 }
+
+.noTopMarginContents>*{
+    margin-top: 0;
+}

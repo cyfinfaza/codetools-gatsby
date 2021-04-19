@@ -11,6 +11,7 @@ import "../components/editor/editorstyle.css"
 import ReactMarkdown from "react-markdown"
 
 import Layout from "../components/layout"
+import LoadingRing from "../components/loadingring"
 import ModalContainer from "../components/modalContainer"
 
 let uploadInstanceCount = 1
@@ -75,12 +76,16 @@ const EditorPage = ({ data }) => {
   args_immutable_ref.current = args_immutable
   const [runStatus, setRunStatus] = useState({ icon: "info", text: "Connecting to ECWS", style: "fancybutton_warn", enabled: false })
   let codeForEditor = code[openCodeKey]
+  const [pageLinkID, setPageLinkID] = useState(null)
   useEffect(async function () {
     try {
       var params = new URLSearchParams(window.location.search)
       const linkID = params.get("id")
+      setPageLinkID(linkID)
       setLinkIdData(linkID)
-      let linkIdFetchResult = await (await fetch(api + "/getContentFromLinkID/" + linkID, { credentials: "include" }).catch(() => setLinkIdData("Failed to connect to server."))).json()
+      let linkIdFetchResult = await (
+        await fetch(api + "/getContentFromLinkID/" + linkID, { credentials: "include" }).catch(() => setLinkIdData("Failed to connect to server."))
+      ).json()
       console.log(linkIdFetchResult)
       setLinkIdData(linkIdFetchResult)
       if (linkIdFetchResult.status == "error") {
@@ -116,9 +121,9 @@ const EditorPage = ({ data }) => {
               return { id: server_arg.id, text: server_arg.arg, output: "No Output" }
             })
           )
+          codeToSet.description = data.description
           if (editorType == "editor_standalone" || editorType == "challenge") {
             metadataToSet.title = data.title
-            codeToSet.description = data.description
           }
           if (editorType == "challenge") {
             codeToSet.starterCode = data.starterCode
@@ -131,7 +136,7 @@ const EditorPage = ({ data }) => {
                 // console.log(assocData)
                 assocData = assocData.data
                 metadataToSet.title = assocData.title
-                codeToSet.description = assocData.description
+                // codeToSet.description = assocData.description
               })
             setArgs_immutable(
               data.args_immutable.map(server_arg => {
@@ -228,7 +233,12 @@ const EditorPage = ({ data }) => {
       uploadInstanceCount += 1
       theUploaderHasGotThis = true
       // console.log(theUploaderHasGotThis);
-      await fetch(api + "/contentset", { credentials: "include", method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(uploadBody) })
+      await fetch(api + "/contentset", {
+        credentials: "include",
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(uploadBody),
+      })
         .then(response => response.json())
         .then(data => {
           // console.log(data);
@@ -272,6 +282,57 @@ const EditorPage = ({ data }) => {
       .then(data => (auth = data.data))
     console.log(auth)
     ecws.send(JSON.stringify({ contentID: contentID, id_sig: id_sig, auth: auth }))
+  }
+  const RepublishForm = () => {
+    const [loading, setLoading] = useState(false)
+    const [thingsToRepublish, setThingsToRepublish] = useState([])
+    const [errorMsg, setErrorMsg] = useState(null)
+    async function submit(event) {
+      event.preventDefault()
+      setErrorMsg(null)
+      setLoading(true)
+      let changeResult = await (
+        await fetch(api + "/republish/" + contentID, { credentials: "include", method: "post", body: JSON.stringify(thingsToRepublish) }).catch(() =>
+          setErrorMsg("Failed to connect to server.")
+        )
+      ).json()
+      console.log(changeResult)
+      if (changeResult.status == "error") {
+        setErrorMsg(changeResult.error)
+        setLoading(false)
+      } else {
+        setOpenModal(null)
+      }
+    }
+    const SelectButton = ({ text, selected = false, onClick }) => (
+      <span style={{ opacity: selected ? 1 : 0.5, marginRight: "8px", cursor: "pointer", userSelect: "none" }} onClick={onClick}>
+        {text}
+      </span>
+    )
+    function toggleThing(thing) {
+      if (thingsToRepublish.includes(thing)) setThingsToRepublish(thingsToRepublish.filter(element => element != thing))
+      else setThingsToRepublish([...thingsToRepublish, thing])
+    }
+    return (
+      <>
+        <form onSubmit={submit}>
+          <p>Select what to republish:</p>
+          <p>
+            <SelectButton selected={thingsToRepublish.includes("description")} onClick={() => toggleThing("description")} text="Description" />
+            <SelectButton selected={thingsToRepublish.includes("args")} onClick={() => toggleThing("args")} text="Tests" />
+            <SelectButton selected={thingsToRepublish.includes("starterCode")} onClick={() => toggleThing("starterCode")} text="Starter Code" />
+          </p>
+
+          <div className="horizPanel">
+            <button className="hoverfancy" style={{ width: "fit-content", marginTop: 8 }} type="submit">
+              Republish
+            </button>
+            <LoadingRing size="24px" active={loading} />
+          </div>
+        </form>
+        {errorMsg && <p style={{ color: "red" }}>{errorMsg}</p>}
+      </>
+    )
   }
   return (
     <Layout pageName="Editor" disableTopPadding>
@@ -320,7 +381,11 @@ const EditorPage = ({ data }) => {
             <label style={{ marginRight: "10px" }} htmlFor="runMethod">
               Method to Run:{" "}
             </label>
-            <input type="text" value={metadata.runMethod ? metadata.runMethod : "myMethod"} onChange={e => setMetadata({ ...metadata, runMethod: e.target.value })}>
+            <input
+              type="text"
+              value={metadata.runMethod ? metadata.runMethod : "myMethod"}
+              onChange={e => setMetadata({ ...metadata, runMethod: e.target.value })}
+            >
               {/* {(() => {
                 var output = []
                 for (var i = 1; i <= 15; i++) {
@@ -333,6 +398,19 @@ const EditorPage = ({ data }) => {
                 return output
               })()} */}
             </input>
+          </div>
+        </Modal>
+        <Modal title="Publish &amp; Assess" open={openModal == "publishOptions"}>
+          <div className="noTopMarginContent">
+            <h2>Publish/Share</h2>
+            <p>Share the URL of this page to let someone else solve the challenge.</p>
+            <h2>See Responses</h2>
+            <p>
+              Visit the <a href={"/responses/?id=" + pageLinkID}>responses page</a>
+            </p>
+            <h2>Republish</h2>
+            <p>If you have made changes since people clicked your link, you will need to republish for them to see those changes.</p>
+            <RepublishForm />
           </div>
         </Modal>
         <LoadingScreen open={openModal == "contentLoading"} noObscure>
@@ -509,12 +587,30 @@ const EditorPage = ({ data }) => {
               <i className="material-icons">add</i> New Test
             </button>
             {editorType != "editor_challenge" && (
-              <button id="setConfiguration" className="hoverfancy" onClick={() => setOpenModal("editConfig")} style={{ paddingRight: "10px", marginTop: "12px" }}>
-                <i className="material-icons" style={{ marginRight: "4px", fontSize: "24px" }}>
-                  tune
-                </i>
-                Config
-              </button>
+              <>
+                <button
+                  id="setConfiguration"
+                  className="hoverfancy"
+                  onClick={() => setOpenModal("publishOptions")}
+                  style={{ paddingRight: "10px", marginTop: "12px" }}
+                >
+                  <i className="material-icons" style={{ marginRight: "4px", fontSize: "24px" }}>
+                    share
+                  </i>
+                  Publish &amp; Assess
+                </button>
+                <button
+                  id="setConfiguration"
+                  className="hoverfancy"
+                  onClick={() => setOpenModal("editConfig")}
+                  style={{ paddingRight: "10px", marginTop: "12px" }}
+                >
+                  <i className="material-icons" style={{ marginRight: "4px", fontSize: "24px" }}>
+                    tune
+                  </i>
+                  Config
+                </button>
+              </>
             )}
           </div>
         </div>
