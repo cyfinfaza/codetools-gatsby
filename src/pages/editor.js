@@ -291,6 +291,7 @@ const EditorPage = ({ data }) => {
       event.preventDefault()
       setErrorMsg(null)
       setLoading(true)
+      await checkAndSave()
       let changeResult = await (
         await fetch(api + "/republish/" + contentID, { credentials: "include", method: "post", body: JSON.stringify(thingsToRepublish) }).catch(() =>
           setErrorMsg("Failed to connect to server.")
