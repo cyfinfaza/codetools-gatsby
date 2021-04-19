@@ -9,6 +9,7 @@ import RunArg from "../components/editor/RunArg"
 import ReadonlyRunArg from "../components/editor/ReadonlyRunArg"
 import "../components/editor/editorstyle.css"
 import ReactMarkdown from "react-markdown"
+import Paho from "paho-mqtt"
 
 import Layout from "../components/layout"
 import LoadingRing from "../components/loadingring"
@@ -77,6 +78,8 @@ const EditorPage = ({ data }) => {
   const [runStatus, setRunStatus] = useState({ icon: "info", text: "Connecting to ECWS", style: "fancybutton_warn", enabled: false })
   let codeForEditor = code[openCodeKey]
   const [pageLinkID, setPageLinkID] = useState(null)
+  const mqttRef = useRef(null)
+  const [assocChallenge, setAssocChallenge] = useState(null)
   useEffect(async function () {
     try {
       var params = new URLSearchParams(window.location.search)
@@ -130,6 +133,9 @@ const EditorPage = ({ data }) => {
           }
           if (data.timeout) metadataToSet.timeout = data.timeout
           if (editorType == "editor_challenge") {
+            setAssocChallenge(data.assocChallenge)
+            console.log(data.assocChallenge)
+            startMQTT(linkID, data.assocChallenge)
             await fetch(api + "/contentget?id=" + data.assocChallenge, { credentials: "include" })
               .then(response => response.json())
               .then(assocData => {
@@ -143,6 +149,8 @@ const EditorPage = ({ data }) => {
                 return { id: server_arg.id, text: server_arg.arg, output: "No Output" }
               })
             )
+          } else {
+            startMQTT(linkID, null)
           }
           setCode(codeToSet)
           codeOnServer = { ...codeToSet }
@@ -227,6 +235,56 @@ const EditorPage = ({ data }) => {
   useEffect(() => {
     console.info("ECWS Run: " + runStatus.text)
   }, [runStatus])
+  const [mqttMessage, setMqttMessage] = useState(null)
+  function startMQTT(linkID, assocChallengeID) {
+    console.log(assocChallengeID)
+    var clientid = "u" + parseInt(Math.random() * 10000000)
+    connect()
+    function connect() {
+      mqttRef.current = new Paho.Client("mq02.cy2.me", 8080, clientid)
+      mqttRef.current.onMessageArrived = onMessageArrived
+      mqttRef.current.onConnectionLost = onFailure
+      mqttRef.current.connect({
+        onSuccess: onConnect,
+        // onFailure: document.getElementById("messages").innerHTML += '<span>ERROR: Connection to: ' + host + ' on port: ' + port + ' failed.</span><br/>';
+        onFailure: onFailure,
+        useSSL: true,
+      })
+    }
+    function onFailure() {
+      console.log("MQTT Failure")
+      mqttRef.current.connect({
+        onSuccess: onConnect,
+        onFailure: onFailure,
+        useSSL: true,
+      })
+    }
+    function onConnect() {
+      mqttRef.current.subscribe("codetools/" + linkID)
+      console.log("MQTT Online ", "codetools/" + linkID)
+    }
+    async function onMessageArrived(message) {
+      // console.log("MQTT Rx: " + message.payloadString)
+      // setOpenModal("newMqtt")
+      // setMqttMessage(message.payloadString)
+      console.log("ASSOC CHALLENGE: ", assocChallengeID)
+      if (assocChallengeID) {
+        var response = await fetch(api + "/verifyrepublishkey/" + assocChallengeID, {
+          credentials: "include",
+          method: "post",
+          body: message.payloadString,
+        })
+        response = await response.json()
+        console.log("Republish Reload Request Verification: ", response)
+        if (response.status == "success") {
+          setOpenModal("republishReload")
+          setInterval(() => {
+            window.location.reload()
+          }, 6000)
+        }
+      }
+    }
+  }
   async function checkAndSave() {
     // console.log(globalUploadFlag);
     if (uploadInstanceCount == 1 && globalUploadFlag) {
@@ -302,6 +360,9 @@ const EditorPage = ({ data }) => {
         setErrorMsg(changeResult.error)
         setLoading(false)
       } else {
+        var message = new Paho.Message(JSON.stringify(changeResult.data))
+        message.destinationName = "codetools/" + pageLinkID
+        mqttRef.current.send(message)
         setOpenModal(null)
       }
     }
@@ -413,6 +474,12 @@ const EditorPage = ({ data }) => {
             <p>If you have made changes since people clicked your link, you will need to republish for them to see those changes.</p>
             <RepublishForm />
           </div>
+        </Modal>
+        <Modal title="Incoming Message" open={openModal == "newMqtt"}>
+          {mqttMessage}
+        </Modal>
+        <Modal title="Republished" open={openModal == "republishReload"}>
+          <p>The owner of this challenge has updated one or more parts of it.</p> <p>Reloading in a few seconds...</p>
         </Modal>
         <LoadingScreen open={openModal == "contentLoading"} noObscure>
           <img src="/CodeToolsLogo.svg" style={{ width: "50%", marginBottom: 16 }}></img>
