@@ -80,31 +80,41 @@ const EditorPage = ({ data }) => {
   const [pageLinkID, setPageLinkID] = useState(null)
   const mqttRef = useRef(null)
   const [assocChallenge, setAssocChallenge] = useState(null)
+  const [readonlyMode, setReadonlyMode] = useState(false)
+  const [pageTitle, setPageTitle] = useState("Editor")
   useEffect(async function () {
     try {
       var params = new URLSearchParams(window.location.search)
       const linkID = params.get("id")
-      setPageLinkID(linkID)
-      setLinkIdData(linkID)
-      let linkIdFetchResult = await (
-        await fetch(api + "/getContentFromLinkID/" + linkID, { credentials: "include" }).catch(() => setLinkIdData("Failed to connect to server."))
-      ).json()
-      console.log(linkIdFetchResult)
-      setLinkIdData(linkIdFetchResult)
-      if (linkIdFetchResult.status == "error") {
-        if (linkIdFetchResult.errorCode == "api_general_session") {
-          localStorage.setItem("intent", window.location.href)
-          window.location = "/signin"
-        } else {
-          setOpenModal("notFoundError")
-          setFetchError(linkIdFetchResult.error)
-        }
-        return
+      if (params.get("viewID")) {
+        setReadonlyMode(true)
+        contentID = params.get("viewID")
+        editorType = "editor_challenge"
+        setPageTitle("View Response")
       } else {
-        editorType = linkIdFetchResult.data.type
+        setPageLinkID(linkID)
+        setLinkIdData(linkID)
+        let linkIdFetchResult = await (
+          await fetch(api + "/getContentFromLinkID/" + linkID, { credentials: "include" }).catch(() => setLinkIdData("Failed to connect to server."))
+        ).json()
+        console.log(linkIdFetchResult)
+        setLinkIdData(linkIdFetchResult)
+        if (linkIdFetchResult.status == "error") {
+          if (linkIdFetchResult.errorCode == "api_general_session") {
+            localStorage.setItem("intent", window.location.href)
+            window.location = "/signin"
+          } else {
+            setOpenModal("notFoundError")
+            setFetchError(linkIdFetchResult.error)
+          }
+          return
+        } else {
+          editorType = linkIdFetchResult.data.type
+        }
+        console.log(editorType)
+        contentID = linkIdFetchResult.data["_id"]
       }
-      console.log(editorType)
-      contentID = linkIdFetchResult.data["_id"]
+
       await fetch(api + "/contentget?id=" + contentID, { credentials: "include" })
         .then(response => response.json())
         .then(async function (data) {
@@ -397,7 +407,7 @@ const EditorPage = ({ data }) => {
     )
   }
   return (
-    <Layout pageName="Editor" disableTopPadding>
+    <Layout pageName={pageTitle} disableTopPadding>
       <ModalContainer globalCloseCallback={() => setOpenModal(null)}>
         <Modal open={openModal == "changeTitle"} title="Change Title">
           <input
@@ -536,7 +546,15 @@ const EditorPage = ({ data }) => {
             className="monacoContainer"
             defaultLanguage={keyLang[openCodeKey]}
             theme="vs-dark"
-            options={{ minimap: { enabled: false }, ...keyOpt[openCodeKey], fontFamily: "DM Mono, monospace" }}
+            options={{
+              minimap: { enabled: false },
+              ...keyOpt[openCodeKey],
+              fontFamily: "DM Mono, monospace",
+              readOnly: readonlyMode,
+              cursorSmoothCaretAnimation: true,
+              // cursorWidth: "0",
+              // cursorStyle: "block",
+            }}
             value={codeForEditor}
             path={openCodeKey}
             // onMount={monacoMounted}
@@ -634,9 +652,9 @@ const EditorPage = ({ data }) => {
             {args_immutable.map(arg => (
               <ReadonlyRunArg key={arg.id} arg={arg} />
             ))}
-            {args.map(arg => (
-              <RunArg key={arg.id} arg={arg} onChange={changeArg} onDelete={deleteArg} />
-            ))}
+            {args.map(arg =>
+              readonlyMode ? <ReadonlyRunArg key={arg.id} arg={arg} /> : <RunArg key={arg.id} arg={arg} onChange={changeArg} onDelete={deleteArg} />
+            )}
           </div>
           <div
             style={{
@@ -651,9 +669,11 @@ const EditorPage = ({ data }) => {
               width: "100%",
             }}
           >
-            <button className="hoverfancy" onClick={newArg} style={{ paddingRight: "12px", marginTop: "12px" }}>
-              <i className="material-icons">add</i> New Test
-            </button>
+            {!readonlyMode && (
+              <button className="hoverfancy" onClick={newArg} style={{ paddingRight: "12px", marginTop: "12px" }}>
+                <i className="material-icons">add</i> New Test
+              </button>
+            )}
             {editorType != "editor_challenge" && (
               <>
                 <button
@@ -683,15 +703,19 @@ const EditorPage = ({ data }) => {
           </div>
         </div>
       </div>
-      <div id="uploadStatusDiv" className="uploadStatusDiv uploadStatusColored" style={{ backgroundColor: uploadFlag ? "#FD0" : "#0F0" }}>
-        <i id="uploadStatusIcon" className="material-icons" style={{ marginRight: "4px" }}>
-          {uploadFlag ? "sync" : "cloud_done"}
-        </i>
-        <span id="uploadStatusText">{uploadFlag ? "Saving..." : "Saved"}</span>
-      </div>
-      <div className="uploadStatusLine uploadStatusColored" style={{ backgroundColor: uploadFlag ? "#FD0" : "#0F0" }}>
-        something
-      </div>
+      {!readonlyMode && (
+        <>
+          <div id="uploadStatusDiv" className="uploadStatusDiv uploadStatusColored" style={{ backgroundColor: uploadFlag ? "#FD0" : "#0F0" }}>
+            <i id="uploadStatusIcon" className="material-icons" style={{ marginRight: "4px" }}>
+              {uploadFlag ? "sync" : "cloud_done"}
+            </i>
+            <span id="uploadStatusText">{uploadFlag ? "Saving..." : "Saved"}</span>
+          </div>
+          <div className="uploadStatusLine uploadStatusColored" style={{ backgroundColor: uploadFlag ? "#FD0" : "#0F0" }}>
+            something
+          </div>
+        </>
+      )}
     </Layout>
   )
 }

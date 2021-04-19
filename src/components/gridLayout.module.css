@@ -1,0 +1,53 @@
+.gridLayout{
+	display: grid;
+	width: 100%;
+	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+	gap: 16px;
+}
+
+.gridCard{
+	background-color: #111;
+	border-radius: 16px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	padding: 16px;
+	height: 200px;
+	text-decoration: none;
+	transition: 120ms ease;
+	animation: fadein 0.25s backwards;
+}
+
+.gridCard>div>*{
+	text-align: inherit;
+}
+
+@keyframes fadein {
+	0%{
+		opacity: 0;
+	}
+}
+
+.clickable{
+	cursor: pointer;
+}
+
+.clickable:hover{
+	background-color: #222;
+}
+
+.clickable:active{
+	background-color: #333;
+}
+
+.gridCard *{
+	margin: 0;
+}
+
+/* .gridCard> *:first-child{
+	margin-bottom: 64px;
+} */
+
+.gridLayout>*{
+	margin: 0;
+}
