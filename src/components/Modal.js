@@ -7,9 +7,15 @@ const Modal = ({ children, onClose, open, title, noCloseButton = false }) => {
     // console.log(event)
   }
   return (
-    <div onKeyDown={checkEsc} className={componentStyle.modal} style={open ? { opacity: 1, transform: "none", pointerEvents: "all" } : { opacity: 0, transform: "scale(0.8)", pointerEvents: "none" }}>
-      <h1 style={{ marginTop: 0 }}>{title}</h1>
-      {children}
+    <div
+      onKeyDown={checkEsc}
+      className={componentStyle.modal}
+      style={open ? { opacity: 1, transform: "none", pointerEvents: "all" } : { opacity: 0, transform: "scale(0.8)", pointerEvents: "none" }}
+    >
+      <div className={componentStyle.modalContent}>
+        <h1 style={{ marginTop: 0 }}>{title}</h1>
+        {children}
+      </div>
       {!noCloseButton && (
         <button
           className="hoverfancy"
@@ -28,6 +34,7 @@ const Modal = ({ children, onClose, open, title, noCloseButton = false }) => {
             WebkitJustifyContent: "center",
             msFlexPack: "center",
             justifyContent: "center",
+            background: "#222",
           }}
           onClick={onClose}
         >
