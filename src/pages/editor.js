@@ -676,17 +676,19 @@ const EditorPage = ({ data }) => {
             )}
             {editorType != "editor_challenge" && (
               <>
-                <button
-                  id="setConfiguration"
-                  className="hoverfancy"
-                  onClick={() => setOpenModal("publishOptions")}
-                  style={{ paddingRight: "10px", marginTop: "12px" }}
-                >
-                  <i className="material-icons" style={{ marginRight: "4px", fontSize: "24px" }}>
-                    share
-                  </i>
-                  Publish &amp; Assess
-                </button>
+                {editorType == "challenge" && (
+                  <button
+                    id="setConfiguration"
+                    className="hoverfancy"
+                    onClick={() => setOpenModal("publishOptions")}
+                    style={{ paddingRight: "10px", marginTop: "12px" }}
+                  >
+                    <i className="material-icons" style={{ marginRight: "4px", fontSize: "24px" }}>
+                      share
+                    </i>
+                    Publish &amp; Assess
+                  </button>
+                )}
                 <button
                   id="setConfiguration"
                   className="hoverfancy"
