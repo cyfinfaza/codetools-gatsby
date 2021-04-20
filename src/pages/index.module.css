@@ -9,6 +9,7 @@
 	
 	background-image: url("/codetoolshome1.png");
 	background-position: center;
+	/* background-attachment: fixed; */
 	background-size:auto;
 	z-index: 0;
 	filter: brightness(0.5);
