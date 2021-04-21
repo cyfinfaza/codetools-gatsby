@@ -75,13 +75,65 @@ const EditorPage = ({ data }) => {
   const [args_immutable, setArgs_immutable] = useState([])
   const args_immutable_ref = useRef()
   args_immutable_ref.current = args_immutable
-  const [runStatus, setRunStatus] = useState({ icon: "info", text: "Connecting to ECWS", style: "fancybutton_warn", enabled: false })
+  const [runStatus, setRunStatus] = useState({ icon: "info", text: "Run System Connecting", style: "fancybutton_warn", enabled: false })
   let codeForEditor = code[openCodeKey]
   const [pageLinkID, setPageLinkID] = useState(null)
   const mqttRef = useRef(null)
   const [assocChallenge, setAssocChallenge] = useState(null)
   const [readonlyMode, setReadonlyMode] = useState(false)
   const [pageTitle, setPageTitle] = useState("Editor")
+  function websocketInit() {
+    ecws = new WebSocket(process.env.GATSBY_ECWS_URL + "/ecws/runcode")
+    ecws.addEventListener("open", () => {
+      setRunStatus({ icon: "play_arrow", text: "Run Code", style: "", enabled: true })
+    })
+    ecws.addEventListener("message", event => {
+      let data = JSON.parse(event.data)
+      let output = ""
+      if (data.type === "statusUpdate") setRunStatus({ icon: "hourglass_full", text: data.status, style: "fancybutton_half", enabled: true })
+      else if (data.type === "error") setRunStatus({ icon: "error", text: data.error, style: "fancybutton_error", enabled: true })
+      else if (data.type === "jobComplete") {
+        if (data.run === "compilerError") {
+          setRunStatus({ icon: "error_outline", text: "Tests did not run", style: "fancybutton_warn", enabled: true })
+          setCurrentCompilerError(data.error)
+          return
+        }
+        setCurrentCompilerError(null)
+        setRunStatus({ icon: "check_circle", text: "Tests Complete", style: "fancybutton_on", enabled: true })
+        // console.log(args_ref.current);
+        setArgs(
+          args_ref.current.map(existingArg => {
+            let thisResult = data.data.filter(runResult => runResult.id === existingArg.id)[0]
+            if (thisResult) {
+              return { ...existingArg, ...thisResult, match: editorType == "editor_challenge" ? null : true }
+            }
+            // console.log(existingArg);
+            return existingArg
+          })
+        )
+        var completionCheck = true
+        setArgs_immutable(
+          args_immutable_ref.current.map(existingArg => {
+            let thisResult = data.data.filter(runResult => runResult.id === existingArg.id)[0]
+            if (thisResult) {
+              completionCheck = completionCheck && thisResult.match
+              return { ...existingArg, ...thisResult }
+            }
+            // console.log(existingArg);
+            completionCheck = completionCheck && existingArg.match
+            return existingArg
+          })
+        )
+        setChallengeComplete(completionCheck)
+      }
+      // console.log(data);
+      // console.log(runStatus);
+    })
+    ecws.addEventListener("close", event => {
+      setRunStatus({ icon: "error", text: "Run System Reconnecting", style: "fancybutton_error", enabled: false })
+      websocketInit()
+    })
+  }
   useEffect(async function () {
     try {
       var params = new URLSearchParams(window.location.search)
@@ -175,55 +227,7 @@ const EditorPage = ({ data }) => {
           console.error(e)
           setOpenModal("fatalError")
         })
-      ecws = new WebSocket(process.env.GATSBY_ECWS_URL + "/ecws/runcode")
-      ecws.addEventListener("open", () => {
-        setRunStatus({ icon: "play_arrow", text: "Run Code", style: "", enabled: true })
-      })
-      ecws.addEventListener("message", event => {
-        let data = JSON.parse(event.data)
-        let output = ""
-        if (data.type === "statusUpdate") setRunStatus({ icon: "hourglass_full", text: data.status, style: "fancybutton_half", enabled: true })
-        else if (data.type === "error") setRunStatus({ icon: "error", text: data.error, style: "fancybutton_error", enabled: true })
-        else if (data.type === "jobComplete") {
-          if (data.run === "compilerError") {
-            setRunStatus({ icon: "error_outline", text: "Tests did not run", style: "fancybutton_warn", enabled: true })
-            setCurrentCompilerError(data.error)
-            return
-          }
-          setCurrentCompilerError(null)
-          setRunStatus({ icon: "check_circle", text: "Tests Complete", style: "fancybutton_on", enabled: true })
-          // console.log(args_ref.current);
-          setArgs(
-            args_ref.current.map(existingArg => {
-              let thisResult = data.data.filter(runResult => runResult.id === existingArg.id)[0]
-              if (thisResult) {
-                return { ...existingArg, ...thisResult, match: editorType == "editor_challenge" ? null : true }
-              }
-              // console.log(existingArg);
-              return existingArg
-            })
-          )
-          var completionCheck = true
-          setArgs_immutable(
-            args_immutable_ref.current.map(existingArg => {
-              let thisResult = data.data.filter(runResult => runResult.id === existingArg.id)[0]
-              if (thisResult) {
-                completionCheck = completionCheck && thisResult.match
-                return { ...existingArg, ...thisResult }
-              }
-              // console.log(existingArg);
-              completionCheck = completionCheck && existingArg.match
-              return existingArg
-            })
-          )
-          setChallengeComplete(completionCheck)
-        }
-        // console.log(data);
-        // console.log(runStatus);
-      })
-      ecws.addEventListener("close", event => {
-        setRunStatus({ icon: "error", text: "ECWS Offline", style: "fancybutton_error", enabled: false })
-      })
+      websocketInit()
     } catch (error) {
       setOpenModal("fatalError")
     }

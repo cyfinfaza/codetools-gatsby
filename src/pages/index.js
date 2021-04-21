@@ -14,8 +14,7 @@ const IndexPage = () => {
     // console.log(window.scrollY)
     setScrolled(window.scrollY != 0)
   }
-  useEffect(() => {
-    document.onscroll = checkScroll
+  function initWebsocket() {
     poprx.current = new WebSocket(process.env.GATSBY_ECWS_URL + "/ecws/poprx")
     poprx.current.addEventListener("open", () => {
       // console.log("ECWS connection opened")
@@ -26,7 +25,13 @@ const IndexPage = () => {
     })
     poprx.current.addEventListener("close", event => {
       // console.log("ECWS connection lost")
+      setRxData(null)
+      initWebsocket()
     })
+  }
+  useEffect(() => {
+    document.onscroll = checkScroll
+    initWebsocket()
   }, [])
   return (
     <Layout disableTopPadding transparentHeader={!scrolled}>
