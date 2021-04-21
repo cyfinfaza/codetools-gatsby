@@ -14,6 +14,12 @@ module.exports = {
         path: `${__dirname}/src/images`,
       },
     },
+    {
+      resolve: "gatsby-plugin-remove-console",
+      options: {
+        exclude: ["error", "warn"], // <- will be removed all console calls except these
+      },
+    },
     `gatsby-transformer-sharp`,
     `gatsby-plugin-sharp`,
 

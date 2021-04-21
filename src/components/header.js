@@ -24,7 +24,7 @@ const Header = ({ pageName, hideButtons = false, hideEditorButton = false, noTab
     // document.querySelector("html").onclick = () => {
     //   setMenuOpen(false)
     // }
-    console.log(api)
+    console.log("Using API: ", api)
     let acctData = await (await fetch(api + "/accountdata", { credentials: "include" })).json()
     console.log(acctData)
     if (acctData.status == "error") {
@@ -37,7 +37,8 @@ const Header = ({ pageName, hideButtons = false, hideEditorButton = false, noTab
     }
   }, [])
   async function signOut() {
-    console.log(await (await fetch(api + "/signout", { credentials: "include" })).json())
+    var signOutResponse = await (await fetch(api + "/signout", { credentials: "include" })).json()
+    console.log(signOutResponse)
     setUser({ active: false })
     setMenuOpen(false)
     if (window.location.pathname != "/") window.location = "/"
