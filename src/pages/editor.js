@@ -96,6 +96,7 @@ const EditorPage = ({ data }) => {
         if (data.run === "compilerError") {
           setRunStatus({ icon: "error_outline", text: "Tests did not run", style: "fancybutton_warn", enabled: true })
           setCurrentCompilerError(data.error)
+          setChallengeComplete(false)
           return
         }
         setCurrentCompilerError(null)
@@ -570,12 +571,15 @@ const EditorPage = ({ data }) => {
           <button
             id="runbutton"
             className={"fancybutton " + (runStatus.enabled ? "fancybutton_enabled " : "") + runStatus.style}
-            style={{ width: "100%", margin: "0" }}
+            style={{ width: "100%", margin: "0", justifyContent: "space-between" }}
             // onmouseover="runButtonHovered()"
             onClick={runStatus.enabled ? runCode : null}
+            onMouseEnter={() => {
+              if (runStatus.enabled) setRunStatus({ icon: "play_arrow", text: "Run Code", style: "", enabled: true })
+            }}
           >
-            <i className="material-icons">{runStatus.icon}</i>
             <span>{runStatus.text}</span>
+            <i className="material-icons">{runStatus.icon}</i>
           </button>
           <div
             id="compilerError"
