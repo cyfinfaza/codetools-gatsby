@@ -1,5 +1,5 @@
 import * as React from "react"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 
 import Layout from "../components/layout"
 
@@ -8,20 +8,41 @@ import * as aboutPageStyle from "./about.module.css"
 
 const IndexPage = () => {
   const [scrolled, setScrolled] = useState(false)
+  const poprx = useRef(null)
+  const [rxData, setRxData] = useState(null)
   function checkScroll(event) {
     // console.log(window.scrollY)
     setScrolled(window.scrollY != 0)
   }
   useEffect(() => {
     document.onscroll = checkScroll
+    poprx.current = new WebSocket(process.env.GATSBY_ECWS_URL + "/ecws/poprx")
+    poprx.current.addEventListener("open", () => {
+      // console.log("ECWS connection opened")
+    })
+    poprx.current.addEventListener("message", event => {
+      let data = JSON.parse(event.data)
+      setRxData(data)
+    })
+    poprx.current.addEventListener("close", event => {
+      // console.log("ECWS connection lost")
+    })
   }, [])
   return (
     <Layout disableTopPadding transparentHeader={!scrolled}>
       <div className={pageStyle.coveringContent} id="scrollCheckContainer">
-        <div>
+        <div className={pageStyle.centerContainer}>
           <h1>Write, practice, test, easy.</h1>
           <h2>The coding platform for APCS students and teachers.</h2>
         </div>
+        {rxData && (
+          <div className={pageStyle.cornerContainer}>
+            <h1>{rxData.customers}</h1>
+            <p>Coders Online</p>
+            <h1>{rxData.employees}</h1>
+            <p>Runner Nodes Online</p>
+          </div>
+        )}
       </div>
       <div className={pageStyle.backgroundImage}>
         <div />
