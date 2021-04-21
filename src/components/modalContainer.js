@@ -3,7 +3,7 @@ import React from "react"
 import * as componentStyle from "./modalContainer.module.css"
 
 const ModalContainer = ({ children, globalCloseCallback = null }) => {
-  console.log(children)
+  // console.log(children)
   var openModal = false
   var fullObscure = false
   var noObscure = false
