@@ -73,14 +73,15 @@ const IndexPage = () => {
           <li>Runner Nodes</li>
         </ol>
         <p>
-          Components 1 and 2 are hosted on <a href="https://vercel.com/">Vercel</a> (a serverless hosting platform). Component 3 is hosted on a VPS
-          (Virtual Private Server) on <a href="https://vultr.com/">Vultr</a>. Of the runner nodes, one is hosted on Vultr as a failsafe, but the rest
-          are hosted personally by various individuals.
+          Components 1 and 2 are hosted on <a href="https://vercel.com/">Vercel</a> (a serverless hosting platform). The database for the API is
+          hosted on <a href="https://www.mongodb.com/cloud/atlas">MongoDB Atlas</a>. Component 3 is hosted <a href="https://heroku.com/">Heroku</a>{" "}
+          (another serverless hosting platform). The runner nodes are hosted personally by various individuals. Their higher system requirements make
+          them harder to host serverless and very expensive to host on a VPS.
         </p>
         <h2>Is the API publicly available / documented?</h2>
         <p>
-          The API is publicly available at <code>https://codetools.cy2.me/api</code> but there is sadly no documentation available at the moment. This
-          may arrive in the future.
+          The API is publicly available at <a href="https://codetools.cy2.me/api">https://codetools.cy2.me/api</a> but there is sadly no documentation
+          available at the moment. This may arrive in the future.
         </p>
         <h2>Who are the contributors to CodeTools?</h2>
         <p>
