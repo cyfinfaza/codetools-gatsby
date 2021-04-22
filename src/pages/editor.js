@@ -90,7 +90,7 @@ const EditorPage = ({ data }) => {
     ecws.addEventListener("message", event => {
       let data = JSON.parse(event.data)
       let output = ""
-      if (data.type === "statusUpdate") setRunStatus({ icon: "hourglass_full", text: data.status, style: "fancybutton_half", enabled: true })
+      if (data.type === "statusUpdate") setRunStatus({ icon: "hourglass_full", text: data.status, style: "fancybutton_half", enabled: false })
       else if (data.type === "error") setRunStatus({ icon: "error", text: data.error, style: "fancybutton_error", enabled: true })
       else if (data.type === "jobComplete") {
         if (data.run === "compilerError") {
@@ -348,7 +348,7 @@ const EditorPage = ({ data }) => {
   async function runCode() {
     setRunStatus({ icon: "hourglass_full", text: "Saving...", style: "fancybutton_half", enabled: false })
     await checkAndSave()
-    setRunStatus({ icon: "hourglass_full", text: "Requesting...", style: "fancybutton_half", enabled: true })
+    setRunStatus({ icon: "hourglass_full", text: "Requesting...", style: "fancybutton_half", enabled: false })
     let auth
     await fetch(api + "/fetchsession", { credentials: "include" })
       .then(response => response.json())
