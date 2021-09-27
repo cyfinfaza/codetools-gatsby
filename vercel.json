@@ -4,5 +4,10 @@
       "source": "/api/:request*",
       "destination": "/api/app.py"
     }
-  ]
+  ],
+  "functions": {
+    "api/**/*.py": {
+      "excludeFiles": "!(api/**)"
+    }
+  }
 }
