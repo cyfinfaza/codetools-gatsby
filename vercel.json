@@ -6,8 +6,8 @@
     }
   ],
   "functions": {
-    "api/app.py": {
-      "excludeFiles": "?(/node_modules*|/src*|/public*|/static*)"
+    "api/**": {
+      "excludeFiles": "{public,static,src,node_modules}/**"
     }
   }
 }
