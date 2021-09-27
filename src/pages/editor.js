@@ -82,6 +82,11 @@ const EditorPage = ({ data }) => {
   const [assocChallenge, setAssocChallenge] = useState(null)
   const [readonlyMode, setReadonlyMode] = useState(false)
   const [pageTitle, setPageTitle] = useState("Editor")
+  function onMonacoMount(_, monaco) {
+    document.fonts.ready.then(() => {
+      monaco.editor.remeasureFonts()
+    })
+  }
   function websocketInit() {
     ecws = new WebSocket(process.env.GATSBY_ECWS_URL + "/ecws/runcode")
     ecws.addEventListener("open", () => {
@@ -562,8 +567,9 @@ const EditorPage = ({ data }) => {
             }}
             value={codeForEditor}
             path={openCodeKey}
-            // onMount={monacoMounted}
+            onMount={onMonacoMount}
             onChange={handleEditorChange}
+            // ref={editorRef}
           />
         </div>
         <div id="argsSidebar" className="sidebar">
