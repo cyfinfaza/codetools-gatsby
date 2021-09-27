@@ -7,7 +7,7 @@
   ],
   "functions": {
     "api/**": {
-      "excludeFiles": "{public,static,src,node_modules}/**"
+      "excludeFiles": "{public,static,src,node_modules,.cache}/**"
     }
   }
 }
