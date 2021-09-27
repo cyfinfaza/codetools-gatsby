@@ -1,9 +1,9 @@
 {
-  "name": "gatsby-starter-default",
+  "name": "codetools-gatsby",
   "private": true,
-  "description": "A simple starter to get up and developing quickly with Gatsby",
-  "version": "0.1.0",
-  "author": "Kyle Mathews <mathews.kyle@gmail.com>",
+  "description": "CodeTools frontend (version 3)",
+  "version": "3.0.0",
+  "author": "Cy Westbrook <cyfinfaza@gmail.com>",
   "dependencies": {
     "@monaco-editor/react": "^4.2.2",
     "babel-plugin-transform-remove-console": "^6.9.4",
@@ -45,9 +45,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/gatsbyjs/gatsby-starter-default"
+    "url": "https://github.com/cyfinfaza/codetools-gatsby"
   },
   "bugs": {
-    "url": "https://github.com/gatsbyjs/gatsby/issues"
+    "url": "https://github.com/cyfinfaza/codetools-gatsby/issues"
   }
 }
