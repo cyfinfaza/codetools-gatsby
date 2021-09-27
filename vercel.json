@@ -7,7 +7,7 @@
   ],
   "functions": {
     "api/**/*.py": {
-      "excludeFiles": "!(api/**)"
+      "excludeFiles": "**/*.js"
     }
   }
 }
